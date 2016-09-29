@@ -55,7 +55,7 @@ class NewVisitorTest(unittest.TestCase):
         self.check_for_row_in_list_table('1: Buy peacock feathers')
         self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
         # 韩梅梅想知道这个网站是否会记住她的清单
-
+        self.fail('Finish the test!')
         # 她看到网站为她生成了一个唯一的URL
         # 而且页面中有一些文字解说这个功能
 
