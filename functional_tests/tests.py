@@ -40,11 +40,12 @@ class NewVisitorTest(LiveServerTestCase):
         # 韩梅梅的爱好是用假蝇做饵钓鱼
         inputbox.send_keys('Buy peacock feathers')
 
-        # 她按回车键后,页面更新了
+        # 她按回车键后,被带到了一个新URL
         # 待办事项表格中显示了 " 1: Buy peacock feathers "
         inputbox.send_keys(Keys.ENTER)
+        hanmeimei_list_url = self.browser.current_url
+        self.assertRegex(hanmeimei_list_url, '/lists/.+')
         self.check_for_row_in_list_table('1: Buy peacock feathers')
-
 
         # 页面中又显示了一个文本框,可以输入其他的待办事项
         # 她输入了"Use peacock feathers to make a fly" (使用孔雀羽毛做假蝇)
@@ -55,11 +56,36 @@ class NewVisitorTest(LiveServerTestCase):
         # 页面再次更新,她的清单中显示了这两个待办事项
         self.check_for_row_in_list_table('1: Buy peacock feathers')
         self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
-        # 韩梅梅想知道这个网站是否会记住她的清单
-        self.fail('Finish the test!')
-        # 她看到网站为她生成了一个唯一的URL
-        # 而且页面中有一些文字解说这个功能
 
-        # 她访问那个URL,发现她的待办事项列表还在
+        # 现在一个叫作李雷的新用户访问了网站
+        ## 我们使用一个新浏览器会话
+        ## 确保韩梅梅的信息不会从cookie中泄露出来
+        self.browser.quit()
+        self.browser = webdriver.Chrome('/home/rayyu/chrome/chromedriver')
 
-        # 她很满意,去睡觉了
+        # 李雷访问首页
+        # 页面中看不到韩梅梅的清单
+
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
+
+        # 李雷输入一个新待办事项,新建一个清单
+        # 他不像韩梅梅那样兴趣盎然
+
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
+
+        # 李雷获得了他的唯一URL
+        lilei_list_url = self.browser.current_url
+        self.assertRegex(lilei_list_url, '/lists/.+')
+        self.assertNotEqual(lilei_list_url, hanmeimei_list_url)
+
+        # 这个页面还是没有韩梅梅的清单
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertIn('Buy milk', page_text)
+
+        # 两人都很满意,去睡觉了
